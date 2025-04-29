@@ -14,11 +14,12 @@ from Crypto.Cipher import AES
 '''
 from pypayuni.setting import HASH_IV, HASH_KEY
 from pypayuni.setting import PAYUNI_SANDBOX_SERVICE_URL, PAYUNI_SERVICE_URL, RETURN_URL, CLIENT_BACK_URL
-from pypayuni.setting import PAYUNI_PERIOD_URL, PAYUNI_SANDBOX_PERIOD_URL 
+from pypayuni.setting import PAYUNI_PERIOD_URL, PAYUNI_SANDBOX_PERIOD_URL
 
 from pypayuni.setting import MERCHANT_ID
 from pypayuni.setting import PAYUNI_SANDBOX
-from pypayuni.setting import PERIOD_TYPE 
+from pypayuni.setting import PERIOD_TYPE
+
 
 class Payuni():
     # If it is in sandbox mode ?
@@ -37,23 +38,26 @@ class Payuni():
 
         self.url_dict['MerID'] = MERCHANT_ID
         self.url_dict['Version'] = '1.0'
-        
+
         self.return_url = RETURN_URL
         self.back_url = CLIENT_BACK_URL
 
-        self.merTradeNo = hashlib.sha224(str(datetime.datetime.now()).encode()).hexdigest().upper()[:24] if not ('MerTradeNo' in payment_conf) else payment_conf['MerTradeNo'] #
+        self.merTradeNo = hashlib.sha224(
+            str(datetime.datetime.now()).encode()
+        ).hexdigest().upper()[:24] if not ('MerTradeNo' in payment_conf) else payment_conf['MerTradeNo'] #
         self.tradeAmt = 300 if not ('TradeAmt' in payment_conf) else payment_conf['TradeAmt']
         self.prodDesc = 'Default Description' if not ('ProdDesc' in payment_conf) else payment_conf['ProdDesc']
-        
+
         self.timestamp = int(time.time())
-        
+
         # === SUBSCRIPTION CONFIG FOR PAYUNI ===
         if subscription:
-            self.periodAmt = payment_conf['TradeAmt']
             subscriptionData = payment_conf.get('subscriptionData', {})
             self.periodAmt = self.tradeAmt
             self.periodType = PERIOD_TYPE.get(subscriptionData.get('PeriodType'), 'month')
-            self.periodTimes = subscriptionData.get('ExecTimes',)
+            self.periodTimes = subscriptionData.get(
+                'ExecTimes',
+            )
             self.fType = 'build'
 
             now = datetime.datetime.now()
@@ -65,10 +69,9 @@ class Payuni():
                 self.periodDate = now.strftime('%Y-%m-%d')
 
             self.service_url = PAYUNI_SANDBOX_PERIOD_URL if self.is_sandbox else PAYUNI_PERIOD_URL
-        
-        
-    def check_out(self, subscription=False):        
-        
+
+    def check_out(self, subscription=False):
+
         encodeDict = {}
         if self.language:
             encodeDict = {'Lang': self.language}
