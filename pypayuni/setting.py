@@ -7,8 +7,12 @@ except:
     settings = {}
 
 PAYUNI_SANDBOX = getattr(settings, 'PAYUNI_SANDBOX', True)
+
 PAYUNI_SERVICE_URL = 'https://api.payuni.com.tw/api/upp'
 PAYUNI_SANDBOX_SERVICE_URL = 'https://sandbox-api.payuni.com.tw/api/upp'
+PAYUNI_PERIOD_URL = 'https://api.payuni.com.tw/api/period/Page'
+PAYUNI_SANDBOX_PERIOD_URL = 'https://sandbox-api.payuni.com.tw/api/period/Page'
+
 
 '''
     Get these from Payuni management panel
@@ -23,3 +27,5 @@ HASH_IV = getattr(settings, 'HASH_IV', '1Q4LTlK18rXBGbJO')
 '''
 RETURN_URL = getattr(settings, 'RETURN_URL', 'http://127.0.0.1:8000/result')
 CLIENT_BACK_URL = getattr(settings, 'CLIENT_BACK_URL', '')
+
+PERIOD_TYPE = {'D': 'week', 'M': 'month', 'Y': 'year'}
