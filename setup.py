@@ -4,7 +4,7 @@ try:
 except:
     from distutils.core import setup
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __author__ = 'Calvin Jeng'
 __email__ = 'lock4567@gmail.com'
 
@@ -25,13 +25,15 @@ setup(
     version=__version__,
     author=__author__,
     author_email=__email__,
-    packages=['pypayuni', ],
-    url='https://github.com/calvinjeng/pypayuni', 
+    packages=[
+        'pypayuni',
+    ],
+    url='https://github.com/calvinjeng/pypayuni',
     license='LICENSE',
     description='PayUni API in python',
     long_description=long_description,
     install_requires=[
-        "pycryptodome>=3.9.0",  # For AES encryption
+        "pycryptodome>=3.9.0", # For AES encryption
         "six>=1.11.0",
     ],
     classifiers=[

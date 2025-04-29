@@ -14,21 +14,25 @@ from Crypto.Cipher import AES
 '''
 from pypayuni.setting import HASH_IV, HASH_KEY
 from pypayuni.setting import PAYUNI_SANDBOX_SERVICE_URL, PAYUNI_SERVICE_URL, RETURN_URL, CLIENT_BACK_URL
+from pypayuni.setting import PAYUNI_PERIOD_URL, PAYUNI_SANDBOX_PERIOD_URL 
+
 from pypayuni.setting import MERCHANT_ID
 from pypayuni.setting import PAYUNI_SANDBOX
-
+from pypayuni.setting import PERIOD_TYPE 
 
 class Payuni():
     # If it is in sandbox mode ?
     is_sandbox = PAYUNI_SANDBOX
 
-    def __init__(self, payment_conf, service_method='post'):
+    def __init__(self, payment_conf, service_method='post', subscription=False):
         self.url_dict = dict()
 
         # === BASIC CONFIG FOR PAYUNI ===
+        if 'Language' in payment_conf:
+            self.language = payment_conf['Language']
         self.service_method = service_method
-        self.HASH_KEY = HASH_KEY
-        self.HASH_IV = HASH_IV
+        self.HASH_KEY = HASH_KEY if not ('HASH_KEY' in payment_conf) else payment_conf['HASH_KEY']
+        self.HASH_IV = HASH_IV if not ('HASH_IV' in payment_conf) else payment_conf['HASH_IV']
         self.service_url = PAYUNI_SANDBOX_SERVICE_URL if self.is_sandbox else PAYUNI_SERVICE_URL
 
         self.url_dict['MerID'] = MERCHANT_ID
@@ -42,31 +46,72 @@ class Payuni():
         self.prodDesc = 'Default Description' if not ('ProdDesc' in payment_conf) else payment_conf['ProdDesc']
         
         self.timestamp = int(time.time())
-
-    def check_out(self):        
-        encodeDict = {
-            'MerID': self.url_dict['MerID'], 
-            'MerTradeNo': self.merTradeNo, 
-            'TradeAmt': self.tradeAmt, 
-            'Timestamp': self.timestamp,
-            'ProdDesc': self.prodDesc,
-            'ReturnURL': self.return_url,
-            'BackURL': self.back_url
-        }
         
+        # === SUBSCRIPTION CONFIG FOR PAYUNI ===
+        if subscription:
+            self.periodAmt = payment_conf['TradeAmt']
+            subscriptionData = payment_conf.get('subscriptionData', {})
+            self.periodAmt = self.tradeAmt
+            self.periodType = PERIOD_TYPE.get(subscriptionData.get('PeriodType'), 'month')
+            self.periodTimes = subscriptionData.get('ExecTimes',)
+            self.fType = 'build'
+
+            now = datetime.datetime.now()
+            if self.periodType == 'week':
+                self.periodDate = str(now.isoweekday())
+            elif self.periodType == 'month':
+                self.periodDate = str(now.day)
+            elif self.periodType == 'year':
+                self.periodDate = now.strftime('%Y-%m-%d')
+
+            self.service_url = PAYUNI_SANDBOX_PERIOD_URL if self.is_sandbox else PAYUNI_PERIOD_URL
+        
+        
+    def check_out(self, subscription=False):        
+        
+        encodeDict = {}
+        if self.language:
+            encodeDict = {'Lang': self.language}
+
+        if subscription:
+            encodeDict.update({
+                'MerID': self.url_dict['MerID'],
+                'MerTradeNo': self.merTradeNo,
+                'PeriodAmt': self.periodAmt,
+                'PeriodType': self.periodType,
+                'PeriodDate': self.periodDate,
+                'PeriodTimes': self.periodTimes,
+                'FType': self.fType,
+                'Timestamp': self.timestamp,
+                'ProdDesc': self.prodDesc,
+                'ReturnURL': self.return_url,
+                'BackURL': self.back_url,
+                'NotifyURL': self.periodReturnUrl,
+            })
+        else:
+            encodeDict.update({
+                'MerID': self.url_dict['MerID'],
+                'MerTradeNo': self.merTradeNo,
+                'TradeAmt': self.tradeAmt,
+                'Timestamp': self.timestamp,
+                'ProdDesc': self.prodDesc,
+                'ReturnURL': self.return_url,
+                'BackURL': self.back_url
+            })
+
         # EncryptInfo
         urlEncode = urllib.parse.urlencode(encodeDict)
         aesCipher = AES.new(self.HASH_KEY.encode(), AES.MODE_GCM, self.HASH_IV.encode())
         ciphertext, tag = aesCipher.encrypt_and_digest(urlEncode.encode())
         encryptInfo = binascii.hexlify(base64.b64encode(ciphertext) + b':::' + base64.b64encode(tag)).decode()
-        
+
         # HashInfo
         hashStr = '%s%s%s' % (self.HASH_KEY, encryptInfo, self.HASH_IV)
         hashInfo = hashlib.sha256(hashStr.encode()).hexdigest().upper()
-        
+
         self.url_dict['EncryptInfo'] = encryptInfo
         self.url_dict['HashInfo'] = hashInfo
-        
+
         return self.url_dict
 
     def gen_check_out_form(self, dict_url, auto_send=True):
