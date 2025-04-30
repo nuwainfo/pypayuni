@@ -36,7 +36,7 @@ class Payuni():
         self.HASH_IV = HASH_IV if not ('HASH_IV' in payment_conf) else payment_conf['HASH_IV']
         self.service_url = PAYUNI_SANDBOX_SERVICE_URL if self.is_sandbox else PAYUNI_SERVICE_URL
 
-        self.url_dict['MerID'] = MERCHANT_ID
+        self.url_dict['MerID'] = MERCHANT_ID if not ('MERCHANT_ID' in payment_conf) else payment_conf['MERCHANT_ID']
         self.url_dict['Version'] = '1.0'
 
         self.return_url = RETURN_URL if not ('ReturnUrl' in payment_conf) else payment_conf['ReturnUrl']
@@ -53,12 +53,10 @@ class Payuni():
         # === SUBSCRIPTION CONFIG FOR PAYUNI ===
         if subscription:
             self.periodAmt = payment_conf['TradeAmt']
-            subscriptionData = payment_conf.get('subscriptionData', {})
+            subscriptionData = payment_conf.get('SubscriptionData', {})
             self.periodAmt = self.tradeAmt
             self.periodType = PERIOD_TYPE.get(subscriptionData.get('PeriodType'), 'month')
-            self.periodTimes = subscriptionData.get(
-                'ExecTimes',
-            )
+            self.periodTimes = int(subscriptionData.get('ExecTimes', 1))
             self.fType = 'build'
 
             now = datetime.datetime.now()
