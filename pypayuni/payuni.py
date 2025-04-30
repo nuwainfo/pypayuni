@@ -39,9 +39,9 @@ class Payuni():
         self.url_dict['MerID'] = MERCHANT_ID
         self.url_dict['Version'] = '1.0'
 
-        self.return_url = RETURN_URL
-        self.back_url = CLIENT_BACK_URL
-
+        self.return_url = RETURN_URL if not ('ReturnUrl' in payment_conf) else payment_conf['ReturnUrl']
+        self.back_url = CLIENT_BACK_URL if not ('BackUrl' in payment_conf) else payment_conf['BackUrl']
+        self.periodReturnUrl = payment_conf['PeriodReturnUrl']
         self.merTradeNo = hashlib.sha224(
             str(datetime.datetime.now()).encode()
         ).hexdigest().upper()[:24] if not ('MerTradeNo' in payment_conf) else payment_conf['MerTradeNo'] #
@@ -52,6 +52,7 @@ class Payuni():
 
         # === SUBSCRIPTION CONFIG FOR PAYUNI ===
         if subscription:
+            self.periodAmt = payment_conf['TradeAmt']
             subscriptionData = payment_conf.get('subscriptionData', {})
             self.periodAmt = self.tradeAmt
             self.periodType = PERIOD_TYPE.get(subscriptionData.get('PeriodType'), 'month')
