@@ -1,5 +1,5 @@
-__author__ = 'Calvin Jeng'
-from .payuni import Payuni
+__author__ = 'Claire Chen'
+
 # Parameter for payment type
 ATM = 'ATM'
 WEB_ATM = 'WebATM'

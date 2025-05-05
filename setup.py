@@ -5,8 +5,8 @@ except:
     from distutils.core import setup
 
 __version__ = '0.1.1'
-__author__ = 'Calvin Jeng'
-__email__ = 'lock4567@gmail.com'
+__author__ = 'Claire Chen'
+__email__ = 'claire.chen@nuwainfo.com'
 
 long_description = """
 This is PayUni(統一金流) SDK implemented in Python.
@@ -17,7 +17,7 @@ Checkout a payment with following method:
 - CVS
 - BARCODE
 Dealing with the POST data after a payment is created or the customer pays.
-Check out github repo: https://github.com/calvinjeng/pypayuni
+Check out github repo: https://github.com/nuwainfo/pypayuni
 """
 
 setup(
@@ -28,9 +28,9 @@ setup(
     packages=[
         'pypayuni',
     ],
-    url='https://github.com/calvinjeng/pypayuni',
+    url='https://github.com/nuwainfo/pypayuni',
     license='LICENSE',
-    description='PayUni API in python',
+    description='PAYUNi API in python',
     long_description=long_description,
     install_requires=[
         "pycryptodome>=3.9.0", # For AES encryption

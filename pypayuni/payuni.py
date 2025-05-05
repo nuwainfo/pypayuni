@@ -6,12 +6,9 @@ import datetime
 import urllib
 import hashlib
 import logging
-import six
 
 from Crypto.Cipher import AES
-'''
-    Configure your personal setting in setting.py
-'''
+
 from pypayuni.setting import HASH_IV, HASH_KEY
 from pypayuni.setting import PAYUNI_SANDBOX_SERVICE_URL, PAYUNI_SERVICE_URL, RETURN_URL, CLIENT_BACK_URL
 from pypayuni.setting import PAYUNI_PERIOD_URL, PAYUNI_SANDBOX_PERIOD_URL
