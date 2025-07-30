@@ -28,6 +28,7 @@ class Payuni():
         # === BASIC CONFIG FOR PAYUNI ===
         if 'Language' in payment_conf:
             self.language = payment_conf['Language']
+
         self.service_method = service_method
         self.HASH_KEY = HASH_KEY if not ('HASH_KEY' in payment_conf) else payment_conf['HASH_KEY']
         self.HASH_IV = HASH_IV if not ('HASH_IV' in payment_conf) else payment_conf['HASH_IV']
@@ -49,20 +50,26 @@ class Payuni():
 
         # === SUBSCRIPTION CONFIG FOR PAYUNI ===
         if subscription:
-            self.periodAmt = payment_conf['TradeAmt']
             subscriptionData = payment_conf.get('SubscriptionData', {})
             self.periodAmt = self.tradeAmt
             self.periodType = PERIOD_TYPE.get(subscriptionData.get('PeriodType'), 'month')
             self.periodTimes = int(subscriptionData.get('ExecTimes', 1))
-            self.fType = 'build'
 
+            self.fType = 'build' if not ('FType' in payment_conf) else payment_conf['FType']
+            self.fAmt = self.tradeAmt if not ('FAmt' in payment_conf) else payment_conf['FAmt']
             now = datetime.datetime.now()
-            if self.periodType == 'week':
-                self.periodDate = str(now.isoweekday())
-            elif self.periodType == 'month':
-                self.periodDate = str(now.day)
-            elif self.periodType == 'year':
-                self.periodDate = now.strftime('%Y-%m-%d')
+            self.fDate = now.strftime('%Y-%m-%d') if not ('FDate' in payment_conf) else payment_conf['FDate']
+
+            if 'PeriodDate' in payment_conf:
+                self.periodDate = payment_conf['PeriodDate']
+            else:
+
+                if self.periodType == 'week':
+                    self.periodDate = str(now.isoweekday()) # 1~7
+                elif self.periodType == 'month':
+                    self.periodDate = str(now.day) # 1~31
+                elif self.periodType == 'year':
+                    self.periodDate = now.strftime('%Y-%m-%d') # yyyy-mm-dd
 
             self.service_url = PAYUNI_SANDBOX_PERIOD_URL if self.is_sandbox else PAYUNI_PERIOD_URL
 
@@ -81,6 +88,8 @@ class Payuni():
                 'PeriodDate': self.periodDate,
                 'PeriodTimes': self.periodTimes,
                 'FType': self.fType,
+                'FAmt': self.fAmt,
+                'FDate': self.fDate,
                 'Timestamp': self.timestamp,
                 'ProdDesc': self.prodDesc,
                 'ReturnURL': self.return_url,
