@@ -88,14 +88,18 @@ class Payuni():
                 'PeriodDate': self.periodDate,
                 'PeriodTimes': self.periodTimes,
                 'FType': self.fType,
-                'FAmt': self.fAmt,
-                'FDate': self.fDate,
                 'Timestamp': self.timestamp,
                 'ProdDesc': self.prodDesc,
                 'ReturnURL': self.return_url,
                 'BackURL': self.back_url,
                 'NotifyURL': self.periodReturnUrl,
             })
+
+            if self.fType != 'build':
+                encodeDict.update({
+                    'FAmt': self.fAmt,
+                    'FDate': self.fDate,
+                })
         else:
             encodeDict.update({
                 'MerID': self.url_dict['MerID'],
